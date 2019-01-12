@@ -47,16 +47,18 @@ public interface SuiteSparse_config
         return ll.load("suitesparseconfig");
     }
 
+    /**
+     * Provide a helper method to allocate the array on the native side, thus avoiding the copy.
+     * Caller can use SuiteSparse_toc directly
+     *
+     * @param c SuiteSparse_config object
+     * @return return from SuiteSparse_tic call
+     */
     public static Pointer HelpTic(SuiteSparse_config c)
     {
         Pointer p = Memory.allocateDirect(Runtime.getSystemRuntime(), Double.BYTES * 2);
         c.SuiteSparse_tic(p);
         return p;
-    }
-
-    public static double HelpToc(SuiteSparse_config c, Pointer toc)
-    {
-        return c.SuiteSparse_toc(toc);
     }
 
     public static SuiteSparseVersion HelpVersion(SuiteSparse_config c)

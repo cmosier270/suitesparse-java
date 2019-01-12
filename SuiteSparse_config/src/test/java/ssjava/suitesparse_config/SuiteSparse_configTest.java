@@ -39,7 +39,7 @@ class SuiteSparse_configTest
     {
         Pointer tic = SuiteSparse_config.HelpTic(ssc);
         Thread.sleep(2000);
-        double diff = SuiteSparse_config.HelpToc(ssc, tic);
+        double diff = ssc.SuiteSparse_toc(tic);
         assertEquals(2.0, diff, 0.001);
 
         /**
@@ -48,6 +48,7 @@ class SuiteSparse_configTest
          * without digging into more code.
          */
         double sst = ssc.SuiteSparse_time();
+        System.out.format("SuiteSparse Time: %f\n", sst);
     }
 
     @Test
