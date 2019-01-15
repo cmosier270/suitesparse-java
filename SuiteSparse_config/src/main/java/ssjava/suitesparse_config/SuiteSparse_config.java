@@ -25,8 +25,8 @@ public interface SuiteSparse_config
     Pointer SuiteSparse_free(@In Pointer p);
 
     /**
-     * Allocate a pointer of float[2] to call tic & toc
-     * @param tic
+     * See HelpTic method to handle allocation as a convenience
+     * @param tic double array length 2
      */
     void SuiteSparse_tic(@In Pointer tic);
     double SuiteSparse_toc(@In Pointer toc);
