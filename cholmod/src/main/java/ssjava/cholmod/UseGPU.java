@@ -2,9 +2,9 @@ package ssjava.cholmod;
 
 public enum UseGPU
 {
-    Prohibited(0),
-    Requested(1),
-    Undefined(-1);
+    PROHIBITED(0),
+    REQUESTED(1),
+    UNDEFINED(-1);
 
     private final int code;
 

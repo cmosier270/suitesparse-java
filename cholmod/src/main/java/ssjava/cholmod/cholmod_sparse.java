@@ -12,7 +12,7 @@ public class cholmod_sparse extends Struct
         SymmetricLower(-1);
         private final int code;
 
-        private SType(int code)
+        SType(int code)
         {
             this.code = code;
         }

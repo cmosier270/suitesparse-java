@@ -28,7 +28,7 @@ public class cholmod_common extends Struct
     public final int32_t print = new int32_t();
     public final int32_t precise = new int32_t();
     public final int32_t try_catch = new int32_t();
-    public final Pointer error_handler = new Pointer();
+    public final Function<ErrorHandler> error_handler = new Function<>(ErrorHandler.class);
     public final int32_t nmethods = new int32_t();
     public final int32_t current = new int32_t();
     public final int32_t selected = new int32_t();
