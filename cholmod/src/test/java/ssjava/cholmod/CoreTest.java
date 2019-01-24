@@ -526,20 +526,5 @@ class CoreTest
         cholmod_common cc = new cholmod_common(Runtime.getSystemRuntime());
         assertEquals(1, core.cholmod_start(cc));
         cholmod_dense X = core.cholmod_eye(5, 5, XType.CHOLMOD_REAL, cc);
-        testEye(X);
-        assertEquals(1, Core.Cholmod_Free_Dense(core, X, cc));
-        assertEquals(1, core.cholmod_finish(cc));
     }
-
-    @Test
-    public void cholmod_l_eye()
-    {
-        cholmod_common cc = new cholmod_common(Runtime.getSystemRuntime());
-        assertEquals(1, core.cholmod_l_start(cc));
-        cholmod_dense X = core.cholmod_l_eye(5, 5, XType.CHOLMOD_REAL, cc);
-        testEye(X);
-        assertEquals(1, Core.Cholmod_L_Free_Dense(core, X, cc));
-        assertEquals(1, core.cholmod_l_finish(cc));
-    }
-
 }

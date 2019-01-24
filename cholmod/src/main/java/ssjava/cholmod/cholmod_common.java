@@ -117,6 +117,10 @@ public class cholmod_common extends Struct
     public final size_t cholmod_gpu_trsm_calls = new size_t();
     public final size_t cholmod_gpu_potrf_calls = new size_t();
 
+    public cholmod_common()
+    {
+        this(Runtime.getSystemRuntime());
+    }
     public cholmod_common(Runtime runtime)
     {
         super(runtime);

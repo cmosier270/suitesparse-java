@@ -18,4 +18,8 @@ public class cholmod_dense extends Struct
     {
         super(runtime);
     }
+    public cholmod_dense()
+    {
+        super(Runtime.getSystemRuntime());
+    }
 }

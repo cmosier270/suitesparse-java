@@ -3,13 +3,13 @@ package ssjava.cholmod;
 import jnr.ffi.Runtime;
 import jnr.ffi.Struct;
 
-public class cholmod_sparse extends Struct
+public class cholmod_triplet extends Struct
 {
     public enum SType
     {
-        Unsymmetric(0),
-        SymmetricUpper(1),
-        SymmetricLower(-1);
+        UNSYMMETRIC(0),
+        SYMMETRIC_UPPER_TRANSPOSE_LOWER(1),
+        SYMMETRIC_LOWER_TRANSPOSE_UPPER(-1);
         private final int code;
 
         SType(int code)
@@ -25,25 +25,24 @@ public class cholmod_sparse extends Struct
     public final size_t nrow = new size_t();
     public final size_t ncol = new size_t();
     public final size_t nzmax = new size_t();
+    public final size_t nnz = new size_t();
 
-    public final Pointer p = new Pointer();
     public final Pointer i = new Pointer();
-    public final Pointer nz = new Pointer();
+    public final Pointer j = new Pointer();
     public final Pointer x = new Pointer();
     public final Pointer z = new Pointer();
 
     public final Enum<SType> stype = new Enum<>(SType.class);
-    public final Enum<ssjava.cholmod.IType> itype = new Enum<>(ssjava.cholmod.IType.class);
-    public final Enum<ssjava.cholmod.XType> xtype = new Enum<>(ssjava.cholmod.XType.class);
-    public final Enum<ssjava.cholmod.DType> dtype = new Enum<>(ssjava.cholmod.DType.class);
+    public final Enum<IType> itype = new Enum<>(IType.class);
+    public final Enum<XType> xtype = new Enum<>(XType.class);
+    public final Enum<DType> dtype = new Enum<>(DType.class);
 
-    public final int32_t sorted = new int32_t();
-    public final int32_t packed = new int32_t();
-    public cholmod_sparse(Runtime runtime)
+    public cholmod_triplet(Runtime runtime)
     {
         super(runtime);
     }
-    public cholmod_sparse()
+
+    public cholmod_triplet()
     {
         this(Runtime.getSystemRuntime());
     }

@@ -141,8 +141,37 @@ public interface Core
                                 @In XType xtype,
                                 cholmod_common cc);
 
+    cholmod_triplet cholmod_allocate_triplet(@In @size_t long nrow,
+                                             @In @size_t long ncol,
+                                             @In @size_t long nzmax,
+                                             @In cholmod_triplet.SType stype,
+                                             @In XType xtype,
+                                             cholmod_common cc);
+
+    cholmod_triplet cholmod_l_allocate_triplet(@In @size_t long nrow,
+                                               @In @size_t long ncol,
+                                               @In @size_t long nzmax,
+                                               @In cholmod_triplet.SType stype,
+                                               @In XType xtype,
+                                               cholmod_common cc);
+
+    int cholmod_free_triplet(PointerByReference T, cholmod_common cc);
+
+    int cholmod_l_free_triplet(PointerByReference T, cholmod_common cc);
+
+    int cholmod_reallocate_triplet(@In @size_t long nznew, cholmod_triplet T, cholmod_common cc);
+
+    int cholmod_l_reallocate_triplet(@In @size_t long nznew, cholmod_triplet T, cholmod_common cc);
+
+    cholmod_sparse cholmod_triplet_to_sparse(@In cholmod_triplet T, @In @size_t long nzmax, cholmod_common cc);
+    cholmod_sparse cholmod_L_triplet_to_sparse(@In cholmod_triplet T, @In @size_t long nzmax, cholmod_common cc);
+
     int cholmod_free_dense(PointerByReference X, cholmod_common cc);
+
     int cholmod_l_free_dense(PointerByReference X, cholmod_common cc);
+
+    int cholmod_free_factor(PointerByReference L, cholmod_common cc);
+    int cholmod_l_free_factor(PointerByReference L, cholmod_common cc);
 
 
     public static int Cholmod_Free_Sparse(Core core, cholmod_sparse A, cholmod_common cc)
@@ -162,9 +191,30 @@ public interface Core
         int rv = core.cholmod_free_dense(pbr, cc);
         return rv;
     }
+
     public static int Cholmod_L_Free_Dense(Core core, cholmod_dense X, cholmod_common cc)
     {
         return core.cholmod_l_free_dense(new PointerByReference(Struct.getMemory(X)), cc);
+    }
+
+    public static int Cholmod_Free_Triplet(Core core, cholmod_triplet T, cholmod_common cc)
+    {
+        return core.cholmod_free_triplet(new PointerByReference(Struct.getMemory(T)), cc);
+    }
+
+    public static int Cholmod_L_Free_Triplet(Core core, cholmod_triplet T, cholmod_common cc)
+    {
+        return core.cholmod_l_free_triplet(new PointerByReference(Struct.getMemory(T)), cc);
+    }
+
+    public static int Cholmod_Free_Factor(Core core, cholmod_factor L, cholmod_common cc)
+    {
+        return core.cholmod_free_factor(new PointerByReference(Struct.getMemory(L)),cc);
+    }
+
+    public static int Cholmod_L_Free_Factor(Core core, cholmod_factor L, cholmod_common cc)
+    {
+        return core.cholmod_l_free_factor(new PointerByReference(Struct.getMemory(L)),cc);
     }
 
     /**
