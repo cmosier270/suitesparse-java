@@ -1,8 +1,6 @@
 package ssjava.suitesparse_config;
 
-import jnr.ffi.LibraryLoader;
-import jnr.ffi.Memory;
-import jnr.ffi.Pointer;
+import jnr.ffi.*;
 import jnr.ffi.Runtime;
 import jnr.ffi.annotations.In;
 import jnr.ffi.annotations.Out;
@@ -67,5 +65,4 @@ public interface SuiteSparse_config
         int w = c.SuiteSparse_version(rv);
         return new SuiteSparseVersion(w, rv[0], rv[1], rv[2]);
     }
-
 }

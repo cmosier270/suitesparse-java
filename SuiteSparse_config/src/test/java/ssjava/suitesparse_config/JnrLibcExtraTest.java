@@ -1,4 +1,4 @@
-package ssjava.cholmod;
+package ssjava.suitesparse_config;
 
 import jnr.ffi.Memory;
 import jnr.ffi.Pointer;
@@ -57,4 +57,5 @@ class JnrLibcExtraTest
 
         tmp.delete();
     }
+
 }

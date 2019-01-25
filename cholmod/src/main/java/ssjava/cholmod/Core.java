@@ -164,7 +164,7 @@ public interface Core
     int cholmod_l_reallocate_triplet(@In @size_t long nznew, cholmod_triplet T, cholmod_common cc);
 
     cholmod_sparse cholmod_triplet_to_sparse(@In cholmod_triplet T, @In @size_t long nzmax, cholmod_common cc);
-    cholmod_sparse cholmod_L_triplet_to_sparse(@In cholmod_triplet T, @In @size_t long nzmax, cholmod_common cc);
+    cholmod_sparse cholmod_l_triplet_to_sparse(@In cholmod_triplet T, @In @size_t long nzmax, cholmod_common cc);
 
     int cholmod_free_dense(PointerByReference X, cholmod_common cc);
 

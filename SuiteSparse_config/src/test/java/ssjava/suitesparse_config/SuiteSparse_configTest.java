@@ -1,13 +1,17 @@
 package ssjava.suitesparse_config;
 
+import jnr.ffi.Memory;
 import jnr.ffi.Pointer;
+import jnr.ffi.Runtime;
+import jnr.ffi.Struct;
 import jnr.ffi.byref.DoubleByReference;
 import jnr.ffi.byref.IntByReference;
+import jnr.ffi.types.size_t;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SuiteSparse_configTest
+public class SuiteSparse_configTest
 {
     private final SuiteSparse_config ssc = SuiteSparse_config.Load();
 
@@ -51,6 +55,14 @@ class SuiteSparse_configTest
         System.out.format("SuiteSparse Time: %f\n", sst);
     }
 
+    public static double[] testDivComplex(double ar, double ai, double br, double bi)
+    {
+        double den = br * br + bi * bi;
+        double reans = (ar * br + ai * bi) / den;
+        double imans = (ai * br - ar * bi) / den;
+        return new double[] {reans, imans};
+    }
+
     @Test
     void math()
     {
@@ -62,22 +74,21 @@ class SuiteSparse_configTest
         double divre = 2.0;
         double divim = 16;
 
-        double den = divre * divre + divim * divim;
-        double reans = (re * divre + im * divim) / den;
-        double imans = (im * divre - re * divim) / den;
+        double[] ans = testDivComplex(re, im, divre, divim);
 
         DoubleByReference ssreans = new DoubleByReference();
         DoubleByReference ssimans = new DoubleByReference();
         assertEquals(0, ssc.SuiteSparse_divcomplex(re, im, divre, divim, ssreans, ssimans));
-        assertEquals(reans, ssreans.doubleValue());
-        assertEquals(imans, ssimans.doubleValue());
+        assertEquals(ans[0], ssreans.doubleValue());
+        assertEquals(ans[1], ssimans.doubleValue());
     }
 
     @Test
-    void version()
+    public void version()
     {
         SuiteSparseVersion v = SuiteSparse_config.HelpVersion(ssc);
         /** Just test grabbing the value, not much else to do */
         System.out.format("Version: %s\n", v.toString());
     }
+
 }

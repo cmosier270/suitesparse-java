@@ -1,13 +1,39 @@
-package ssjava.cholmod;
+package ssjava.suitesparse_config;
 
 import jnr.ffi.*;
 import jnr.ffi.Runtime;
+import jnr.ffi.annotations.Delegate;
 import jnr.ffi.annotations.In;
+import jnr.ffi.annotations.Out;
 import jnr.ffi.provider.FFIProvider;
 import jnr.ffi.types.*;
 
 public interface JnrLibcExtra
 {
+    interface malloc_funcifc
+    {
+        @Delegate
+        Pointer xmalloc(@size_t long size);
+    }
+    @FunctionalInterface
+    interface calloc_func
+    {
+        @Delegate
+        Pointer calloc(@Out @size_t long nmemb, @Out @size_t long size);
+    }
+    @FunctionalInterface
+    interface realloc_func
+    {
+        @Delegate
+        Pointer realloc(@Out Pointer ptr, @Out @size_t long size);
+    }
+    @FunctionalInterface
+    interface free_func
+    {
+        @Delegate
+        void free(@Out Pointer p);
+
+    }
     public static JnrLibcExtra Load()
     {
         FFIProvider provider = FFIProvider.getSystemProvider();
