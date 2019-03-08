@@ -7,9 +7,9 @@ public class cholmod_sparse extends Struct
 {
     public enum SType
     {
-        Unsymmetric(0),
-        SymmetricUpper(1),
-        SymmetricLower(-1);
+        UNSYMMETRIC(0),
+        SYMMETRIC_UPPER(1),
+        SYMMETRIC_LOWER(-1);
         private final int code;
 
         SType(int code)

@@ -344,7 +344,7 @@ class CoreTest
         assertEquals(25, A.ncol.intValue());
         assertEquals(nzmax, A.nzmax.intValue());
         assertEquals(DType.CHOLMOD_DOUBLE, A.dtype.get()); // is only ever double
-        assertEquals(cholmod_sparse.SType.Unsymmetric,
+        assertEquals(cholmod_sparse.SType.UNSYMMETRIC,
                 A.stype.get());
         assertEquals(XType.CHOLMOD_REAL, A.xtype.get());
         assertEquals(iType, A.itype.get());
@@ -363,7 +363,7 @@ class CoreTest
         cholmod_common cc = new cholmod_common();
         assertEquals(1, core.cholmod_start(cc));
         cholmod_sparse A = core.cholmod_allocate_sparse(25, 25, 100, 1,
-                1, cholmod_sparse.SType.Unsymmetric, XType.CHOLMOD_REAL, cc);
+                1, cholmod_sparse.SType.UNSYMMETRIC, XType.CHOLMOD_REAL, cc);
         testSparse(A, IType.CHOLMOD_INT, 100);
         A.x.get().putDouble(99, 123.456);
         assertEquals(1, core.cholmod_reallocate_sparse(200, A, cc));
@@ -382,7 +382,7 @@ class CoreTest
         cholmod_common cc = new cholmod_common();
         assertEquals(1, core.cholmod_l_start(cc));
         cholmod_sparse A = core.cholmod_l_allocate_sparse(25, 25, 100, 1,
-                1, cholmod_sparse.SType.Unsymmetric, XType.CHOLMOD_REAL, cc);
+                1, cholmod_sparse.SType.UNSYMMETRIC, XType.CHOLMOD_REAL, cc);
         testSparse(A, IType.CHOLMOD_LONG, 100);
         A.x.get().putDouble(99, 123.456);
         assertEquals(1, core.cholmod_l_reallocate_sparse(200, A, cc));
@@ -549,6 +549,32 @@ class CoreTest
         assertEquals(1, core.cholmod_l_finish(cc));
     }
 
+    @Test
+    void cholmod_copy_dense()
+    {
+        cholmod_common cc = new cholmod_common();
+        assertEquals(1, core.cholmod_start(cc));
+        cholmod_dense X = core.cholmod_eye(5, 5, XType.CHOLMOD_REAL, cc);
+        cholmod_dense X2 = core.cholmod_copy_dense(X, cc);
+        testEye(X2);
+        assertEquals(1, Core.Cholmod_Free_Dense(core, X, cc));
+        assertEquals(1, Core.Cholmod_Free_Dense(core, X2, cc));
+        assertEquals(1, core.cholmod_finish(cc));
+    }
+
+    @Test
+    void cholmod_l_copy_dense()
+    {
+        cholmod_common cc = new cholmod_common();
+        assertEquals(1, core.cholmod_l_start(cc));
+        cholmod_dense X = core.cholmod_l_eye(5, 5, XType.CHOLMOD_REAL, cc);
+        cholmod_dense X2 = core.cholmod_l_copy_dense(X, cc);
+        testEye(X2);
+        assertEquals(1, Core.Cholmod_L_Free_Dense(core, X, cc));
+        assertEquals(1, Core.Cholmod_L_Free_Dense(core, X2, cc));
+        assertEquals(1, core.cholmod_l_finish(cc));
+    }
+
     private void testArray(long[] expected, Pointer i)
     {
         int n = expected.length;
@@ -582,7 +608,7 @@ class CoreTest
         assertEquals(1, core.cholmod_reallocate_triplet(250, T, cc));
         testArray(CholeskyTest.mi, T.i.get());
         testArray(CholeskyTest.mj, T.j.get());
-        testArray(CholeskyTest.x, T.x.get());
+        testArray(CholeskyTest.mx, T.x.get());
 
         assertEquals(1, Core.Cholmod_Free_Triplet(core, T, cc));
         assertEquals(1, core.cholmod_finish(cc));
@@ -597,7 +623,7 @@ class CoreTest
         assertEquals(1, core.cholmod_l_reallocate_triplet(250, T, cc));
         testArray(CholeskyTest.lmi, T.i.get());
         testArray(CholeskyTest.lmj, T.j.get());
-        testArray(CholeskyTest.x, T.x.get());
+        testArray(CholeskyTest.mx, T.x.get());
         assertEquals(1, Core.Cholmod_L_Free_Triplet(core, T, cc));
         assertEquals(1, core.cholmod_l_finish(cc));
     }
@@ -633,6 +659,85 @@ class CoreTest
 
         assertEquals(1, Core.Cholmod_L_Free_Sparse(core, A, cc));
         assertEquals(1, Core.Cholmod_L_Free_Triplet(core, T, cc));
+        assertEquals(1, core.cholmod_l_finish(cc));
+    }
+
+    @Test
+    void cholmod_version()
+    {
+        Core.CholmodVersion ver = Core.getCholmodVersion(core);
+        System.out.format("cholmod_version: %s\n", ver.toString());
+    }
+
+    private static final int[] tps_p1 = {0, 2, 4};
+    private static final int[] tps_i1 = {0, 2, 0, 1};
+    private static final double[] tps_x1 = {1.0, 6.0, 8.0, 1.0};
+    private static final int[] tps_p2 = {0, 2, 3, 4};
+    private static final int[] tps_i2 = {0, 1, 1, 0};
+    private static final double[] tps_x2 = {1.0, 8.0, 1.0, 6.0};
+
+
+    @Test
+    void cholmod_transpose_sparse()
+    {
+        cholmod_common cc = new cholmod_common();
+        assertEquals(1, core.cholmod_start(cc));
+        int ncol = 2;
+        int nrow = 3;
+        int nzmax = 4;
+        cholmod_sparse A = core.cholmod_allocate_sparse(3, ncol, nzmax, 1, 1, cholmod_sparse.SType.UNSYMMETRIC, XType.CHOLMOD_REAL, cc);
+        A.p.get().put(0, tps_p1, 0, ncol + 1);
+        A.i.get().put(0, tps_i1, 0, nzmax);
+        A.x.get().put(0, tps_x1, 0, nzmax);
+        cholmod_sparse At = core.cholmod_transpose(A, 2, cc);
+        int[] p2 = new int[nrow + 1];
+        int[] i2 = new int[nzmax];
+        double[] x2 = new double[nzmax];
+        At.p.get().get(0, p2, 0, nrow + 1);
+        assertArrayEquals(tps_p2, p2);
+        At.i.get().get(0, i2, 0, nzmax);
+        assertArrayEquals(tps_i2, i2);
+        At.x.get().get(0, x2, 0, nzmax);
+        assertArrayEquals(tps_x2, x2);
+
+        assertEquals(1, Core.Cholmod_Free_Sparse(core, A, cc));
+        assertEquals(1, Core.Cholmod_Free_Sparse(core, At, cc));
+        assertEquals(1, core.cholmod_finish(cc));
+    }
+
+    @Test
+    void cholmod_l_transpose_sparse()
+    {
+        cholmod_common cc = new cholmod_common();
+        assertEquals(1, core.cholmod_l_start(cc));
+        int ncol = 2;
+        int nrow = 3;
+        int nzmax = 4;
+        long[] ltps_p1 = new long[ncol + 1];
+        for (int i = 0; i < ncol + 1; ++i) ltps_p1[i] = tps_p1[i];
+        long[] ltps_i1 = new long[nzmax];
+        for (int i = 0; i < nzmax; ++i) ltps_i1[i] = tps_i1[i];
+        cholmod_sparse A = core.cholmod_l_allocate_sparse(3, ncol, nzmax, 1, 1, cholmod_sparse.SType.UNSYMMETRIC, XType.CHOLMOD_REAL, cc);
+        A.p.get().put(0, ltps_p1, 0, ncol + 1);
+        A.i.get().put(0, ltps_i1, 0, nzmax);
+        A.x.get().put(0, tps_x1, 0, nzmax);
+        cholmod_sparse At = core.cholmod_l_transpose(A, 2, cc);
+        long[] p2 = new long[nrow + 1];
+        long[] i2 = new long[nzmax];
+        double[] x2 = new double[nzmax];
+        long[] ltps_p2 = new long[nrow + 1];
+        for (int i = 0; i < nrow + 1; ++i) ltps_p2[i] = tps_p2[i];
+        long[] ltps_i2 = new long[nzmax];
+        for (int i = 0; i < nzmax; ++i) ltps_i2[i] = tps_i2[i];
+        At.p.get().get(0, p2, 0, nrow + 1);
+        assertArrayEquals(ltps_p2, p2);
+        At.i.get().get(0, i2, 0, nzmax);
+        assertArrayEquals(ltps_i2, i2);
+        At.x.get().get(0, x2, 0, nzmax);
+        assertArrayEquals(tps_x2, x2);
+
+        assertEquals(1, Core.Cholmod_L_Free_Sparse(core, A, cc));
+        assertEquals(1, Core.Cholmod_L_Free_Sparse(core, At, cc));
         assertEquals(1, core.cholmod_l_finish(cc));
     }
 }

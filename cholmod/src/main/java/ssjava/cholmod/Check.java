@@ -27,4 +27,13 @@ public interface Check
 
     int cholmod_print_triplet(@In cholmod_triplet T, @In String name, cholmod_common cc);
 
+    int cholmod_print_dense(@In cholmod_dense X, @In String name, cholmod_common cc);
+    int cholmod_l_print_dense(@In cholmod_dense X, @In String name, cholmod_common cc);
+
+    int cholmod_print_factor(@In cholmod_factor L, @In String name, cholmod_common cc);
+    int cholmod_l_print_factor(@In cholmod_factor L, @In String name, cholmod_common cc);
+
+    int cholmod_gpu_stats   (cholmod_common cc) ;
+    int cholmod_l_gpu_stats (cholmod_common cc) ;
+
 }

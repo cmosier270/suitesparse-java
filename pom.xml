@@ -10,6 +10,7 @@
     <modules>
         <module>SuiteSparse_config</module>
         <module>cholmod</module>
+        <module>cholmod_demo</module>
     </modules>
     <packaging>pom</packaging>
 

@@ -22,7 +22,50 @@ public interface Core
         return ll.load("cholmod");
     }
 
+    public static class CholmodVersion
+    {
+        public int getMain()
+        {
+            return main;
+        }
+
+        public int getSub()
+        {
+            return sub;
+        }
+
+        public int getSubsub()
+        {
+            return subsub;
+        }
+
+        private final int rv;
+        private final int main;
+        private final int sub;
+        private final int subsub;
+
+        CholmodVersion(int rv, int[] detail)
+        {
+            this.rv = rv;
+            this.main = detail[0];
+            this.sub = detail[1];
+            this.subsub = detail[2];
+        }
+
+        @Override
+        public String toString()
+        {
+            return String.format("%d [%d,%d,%d]",
+                    rv,
+                    main,
+                    sub,
+                    subsub);
+        }
+    }
+
     static final int CHOLMOD_HOST_SUPERNODE_BUFFERS = 8;
+
+    int cholmod_version(@Out int[] version);
 
     int cholmod_start(cholmod_common cc);
 
@@ -141,6 +184,9 @@ public interface Core
                                 @In XType xtype,
                                 cholmod_common cc);
 
+    cholmod_dense cholmod_copy_dense(@In cholmod_dense X, cholmod_common cc);
+    cholmod_dense cholmod_l_copy_dense(@In cholmod_dense X, cholmod_common cc);
+
     cholmod_triplet cholmod_allocate_triplet(@In @size_t long nrow,
                                              @In @size_t long ncol,
                                              @In @size_t long nzmax,
@@ -173,6 +219,9 @@ public interface Core
     int cholmod_free_factor(PointerByReference L, cholmod_common cc);
     int cholmod_l_free_factor(PointerByReference L, cholmod_common cc);
 
+    cholmod_sparse cholmod_transpose(cholmod_sparse A, int values, cholmod_common cc);
+    cholmod_sparse cholmod_l_transpose(cholmod_sparse A, int values, cholmod_common cc);
+
 
     public static int Cholmod_Free_Sparse(Core core, cholmod_sparse A, cholmod_common cc)
     {
@@ -189,6 +238,7 @@ public interface Core
         Pointer p = Struct.getMemory(X);
         PointerByReference pbr = new PointerByReference(p);
         int rv = core.cholmod_free_dense(pbr, cc);
+//        X.useMemory(null);
         return rv;
     }
 
@@ -215,6 +265,13 @@ public interface Core
     public static int Cholmod_L_Free_Factor(Core core, cholmod_factor L, cholmod_common cc)
     {
         return core.cholmod_l_free_factor(new PointerByReference(Struct.getMemory(L)),cc);
+    }
+
+    public static CholmodVersion getCholmodVersion(Core core)
+    {
+        int[] v = new int[3];
+        int rv = core.cholmod_version(v);
+        return new CholmodVersion(rv, v);
     }
 
     /**

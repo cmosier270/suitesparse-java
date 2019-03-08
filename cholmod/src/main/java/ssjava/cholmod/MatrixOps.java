@@ -20,4 +20,7 @@ public interface MatrixOps
 
     double cholmod_norm_dense (@In cholmod_dense X, @In int norm, cholmod_common cc);
     double cholmod_l_norm_dense (@In cholmod_dense X, @In int norm, cholmod_common cc);
+
+    double cholmod_norm_sparse(@In cholmod_sparse A, @In int norm, cholmod_common cc);
+    double cholmod_l_norm_sparse(@In cholmod_sparse A, @In int norm, cholmod_common cc);
 }

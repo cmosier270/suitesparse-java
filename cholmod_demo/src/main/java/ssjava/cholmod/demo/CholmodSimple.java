@@ -22,6 +22,7 @@ package ssjava.cholmod.demo;
  */
 
 import ssjava.cholmod.*;
+import ssjava.suitesparse_config.JnrLibcExtra;
 
 import java.util.Arrays;
 
