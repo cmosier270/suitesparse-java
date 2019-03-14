@@ -351,7 +351,7 @@ public class CholmodDemo
             double[] Xx = new double[nrow];
             double[] Rx = new double[nrow];
             pXx.get(0, Xx, 0, nrow);
-            R.x.get().get(0, Rx, 0, nrow);
+            R2.x.get().get(0, Rx, 0, nrow);
 
             for (int i = 0; i < nrow; i++)
             {
@@ -374,6 +374,8 @@ public class CholmodDemo
     private Residual computeResidual(cholmod_dense X)
     {
         cholmod_dense R = null;
+        double[] Xx2 = new double[nrow];
+        X.x.get().get(0, Xx2, 0, nrow);
         if (A.stype.get() == cholmod_sparse.SType.UNSYMMETRIC)
         {
             /* (AA'+beta*I)x=b is the linear system that was solved */
@@ -425,9 +427,10 @@ public class CholmodDemo
     private cholmod_dense solve(cholmod_dense B, cholmod_factor L, double[] resid) throws IOException
     {
         Residual robj = null;
-        cholmod_dense X = null;
+        cholmod_dense Xlast = null;
         for (int method = 0; method <= 3; method++)
         {
+            cholmod_dense X = null;
             resid[method] = -1;       /* not yet computed */
             boolean doComputeResidual = true;
             switch (method)
@@ -444,17 +447,19 @@ public class CholmodDemo
                 default:
                     X = solve_resusedws_sparseBset(L, B, resid);
                     doComputeResidual = false;
+                    Xlast = X;
                     break;
             }
             if (doComputeResidual)
             {
                 robj = computeResidual(X);
                 resid[method] = robj.getResid();
+                Core.Cholmod_Free_Dense(core,X,cm);
             }
         }
-        resid[4] = iterativeRefinement(L, X, robj);
+        resid[4] = iterativeRefinement(L, Xlast, robj);
         robj.cleanup();
-        return X;
+        return Xlast;
     }
 
     private cholmod_dense solve_resusedws_sparseBset(cholmod_factor L, cholmod_dense B, double[] resid) throws IOException
@@ -615,11 +620,11 @@ public class CholmodDemo
         PointerByReference Ework = new PointerByReference();
         PointerByReference Xptr = new PointerByReference();
         Pointer pBx = B.x.get();
-        double x = (double) nrow;
         double t = cfg.SuiteSparse_time();
+        pBx.putDouble(0, adjustB0(0));
         for (int trial = 1; trial < NTRIALS; ++trial)
         {
-            pBx.putDouble(0, ((double) 1 + trial) / x);
+            pBx.putDouble(0, adjustB0(trial));
             chol.cholmod_solve2(CHOLMOD_A, L, B, null, Xptr, null, Ywork, Ework, cm);
         }
         core.cholmod_free_dense(Ywork, cm);
@@ -633,18 +638,24 @@ public class CholmodDemo
     private cholmod_dense basic_solve_multiple(cholmod_factor L, cholmod_dense B)
     {
         Pointer pBx = B.x.get();
-        double x = (double) nrow;
         double t = cfg.SuiteSparse_time();
-        pBx.putDouble(0, 1.0 / x);
+        pBx.putDouble(0, adjustB0(0));
+        double[] foox = new double[nrow];
         cholmod_dense X = chol.cholmod_solve(CHOLMOD_A, L, B, cm);
-        for (int trial = 1; trial < NTRIALS; ++trial)
+        for (int trial = 0; trial < NTRIALS; ++trial)
         {
             Core.Cholmod_Free_Dense(core, X, cm);
-            pBx.putDouble(0, ((double) 1 + trial) / x);
+            pBx.putDouble(0, adjustB0(trial));
+            pBx.get(0, foox, 0, nrow);
             X = chol.cholmod_solve(CHOLMOD_A, L, B, cm);
         }
         timeRecord.setSolveMethod1(t);
         return X;
+    }
+
+    public double adjustB0(int trial)
+    {
+        return 1.0 + (double) trial / (double) nrow;
     }
 
     private cholmod_dense basic_solve(cholmod_factor L, cholmod_dense B)
