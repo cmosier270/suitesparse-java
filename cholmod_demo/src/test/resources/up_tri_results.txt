@@ -1,0 +1,25 @@
+cholmod version 3.0.13
+SuiteSparse version 5.4.0
+norm (A,inf) = 47.2361
+norm (A,1)   = 47.2361
+CHOLMOD sparse:  A:  3-by-3, nz 5, upper.  OK
+CHOLMOD dense:   B:  3-by-1,   OK
+bnorm 1.66759
+Analyze: flop 9 lnz 5
+Factorizing A
+CHOLMOD factor:  L:  3-by-3  simplicial, LDL'. nzmax 5.  nz 5  OK
+Ordering: AMD     fl/lnz        1.8  lnz/anz        1.0
+ints in L:              28, doubles in L:               5
+factor flops 9 nnz(L)               5 (w/no amalgamation)
+nnz(A*A'):               5
+flops / nnz(L):       1.8
+nnz(L) / nnz(A):      1.0
+analyze cputime:        0.0000
+factor  cputime:         0.0000 mflop:      0.4
+solve   cputime:         0.0000 mflop:      2.0
+overall cputime:         0.0001 mflop:      0.4
+solve   cputime:         0.0000 mflop:     18.9 (100 trials)
+solve2  cputime:         0.0000 mflop:     65.7 (100 trials)
+peak memory usage:            0 (MB)
+residual (|Ax-b|/(|A||x|+|b|)): 1.30e-18 9.34e-19 9.34e-19 0.00e+00
+rcond     3.6e-02

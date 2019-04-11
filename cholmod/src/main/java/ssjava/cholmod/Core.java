@@ -225,12 +225,18 @@ public interface Core
 
     public static int Cholmod_Free_Sparse(Core core, cholmod_sparse A, cholmod_common cc)
     {
-        return core.cholmod_free_sparse(new PointerByReference(Struct.getMemory(A)), cc);
+        PointerByReference Aref = new PointerByReference(Struct.getMemory(A));
+        int rv = core.cholmod_free_sparse(Aref, cc);
+        A.useMemory(Aref.getValue());
+        return rv;
     }
 
     public static int Cholmod_L_Free_Sparse(Core core, cholmod_sparse A, cholmod_common cc)
     {
-        return core.cholmod_l_free_sparse(new PointerByReference(Struct.getMemory(A)), cc);
+        PointerByReference Aref = new PointerByReference(Struct.getMemory(A));
+        int rv = core.cholmod_l_free_sparse(Aref, cc);
+        A.useMemory(Aref.getValue());
+        return rv;
     }
 
     public static int Cholmod_Free_Dense(Core core, cholmod_dense X, cholmod_common cc)
@@ -238,33 +244,48 @@ public interface Core
         Pointer p = Struct.getMemory(X);
         PointerByReference pbr = new PointerByReference(p);
         int rv = core.cholmod_free_dense(pbr, cc);
-//        X.useMemory(null);
+        X.useMemory(pbr.getValue());
         return rv;
     }
 
     public static int Cholmod_L_Free_Dense(Core core, cholmod_dense X, cholmod_common cc)
     {
-        return core.cholmod_l_free_dense(new PointerByReference(Struct.getMemory(X)), cc);
+        PointerByReference Xref = new PointerByReference(Struct.getMemory(X));
+        int rv = core.cholmod_l_free_dense(Xref, cc);
+        X.useMemory(Xref.getValue());
+        return rv;
     }
 
     public static int Cholmod_Free_Triplet(Core core, cholmod_triplet T, cholmod_common cc)
     {
-        return core.cholmod_free_triplet(new PointerByReference(Struct.getMemory(T)), cc);
+        PointerByReference Tref = new PointerByReference(Struct.getMemory(T));
+        int rv = core.cholmod_free_triplet(Tref, cc);
+        T.useMemory(Tref.getValue());
+        return rv;
     }
 
     public static int Cholmod_L_Free_Triplet(Core core, cholmod_triplet T, cholmod_common cc)
     {
-        return core.cholmod_l_free_triplet(new PointerByReference(Struct.getMemory(T)), cc);
+        PointerByReference Tref = new PointerByReference(Struct.getMemory(T));
+        int rv = core.cholmod_l_free_triplet(Tref, cc);
+        T.useMemory(Tref.getValue());
+        return rv;
     }
 
     public static int Cholmod_Free_Factor(Core core, cholmod_factor L, cholmod_common cc)
     {
-        return core.cholmod_free_factor(new PointerByReference(Struct.getMemory(L)),cc);
+        PointerByReference Lref = new PointerByReference(Struct.getMemory(L));
+        int rv = core.cholmod_free_factor(Lref, cc);
+        L.useMemory(Lref.getValue());
+        return rv;
     }
 
     public static int Cholmod_L_Free_Factor(Core core, cholmod_factor L, cholmod_common cc)
     {
-        return core.cholmod_l_free_factor(new PointerByReference(Struct.getMemory(L)),cc);
+        PointerByReference Lref = new PointerByReference(Struct.getMemory(L));
+        int rv = core.cholmod_l_free_factor(Lref,cc);
+        L.useMemory(Lref.getValue());
+        return rv;
     }
 
     public static CholmodVersion getCholmodVersion(Core core)
