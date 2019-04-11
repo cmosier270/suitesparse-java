@@ -1,2 +1,2 @@
 # suitesparse-java
-Interface to SuiteSparse shared library using Java Native Runtime
+Interface to [SuiteSparse](http://suitesparse.com/) shared libraries using the [Java Native Runtime](https://github.com/jnr/).
