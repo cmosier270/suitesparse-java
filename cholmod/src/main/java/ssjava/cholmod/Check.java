@@ -23,9 +23,8 @@ public interface Check
     cholmod_triplet cholmod_read_triplet(@In Pointer /* (FILE *) */ f, cholmod_common cc);
     cholmod_triplet cholmod_l_read_triplet(@In Pointer /* (FILE *) */ f, cholmod_common cc);
 
-
-
     int cholmod_print_triplet(@In cholmod_triplet T, @In String name, cholmod_common cc);
+    int cholmod_l_print_triplet(@In cholmod_triplet T, @In String name, cholmod_common cc);
 
     int cholmod_print_dense(@In cholmod_dense X, @In String name, cholmod_common cc);
     int cholmod_l_print_dense(@In cholmod_dense X, @In String name, cholmod_common cc);

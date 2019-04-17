@@ -5,14 +5,14 @@ import jnr.ffi.Struct;
 
 public class cholmod_dense extends Struct implements MatrixRepresentation
 {
-    public final size_t nrow = new size_t();
-    public final size_t ncol = new size_t();
-    public final size_t nzmax = new size_t();
-    public final size_t d = new size_t();
-    public final Pointer x = new Pointer();
-    public final Pointer z = new Pointer();
-    public final Enum<XType> xtype = new Enum<>(XType.class);
-    public final Enum<DType> dtype = new Enum<>(DType.class);
+    private final size_t nrow = new size_t();
+    private final size_t ncol = new size_t();
+    private final size_t nzmax = new size_t();
+    private final size_t d = new size_t();
+    private final Pointer x = new Pointer();
+    private final Pointer z = new Pointer();
+    private final Enum<XType> xtype = new Enum<>(XType.class);
+    private final Enum<DType> dtype = new Enum<>(DType.class);
 
     public cholmod_dense(Runtime runtime)
     {
@@ -24,43 +24,49 @@ public class cholmod_dense extends Struct implements MatrixRepresentation
     }
 
     @Override
-    public MatrixValues<double[]> getDoubleValues()
+    public int getNRow()
     {
-        int nz = nzmax.intValue();
-        double[] Xz = null;
-        switch (xtype.get())
-        {
-            case CHOLMOD_PATTERN:
-                throw new RuntimeException("CHOLMOD_PATTERN unsupported");
-            case CHOLMOD_ZOMPLEX:
-            {
-                Xz = new double[nz];
-                z.get().get(0, Xz, 0, nz);
-            }
-            case CHOLMOD_COMPLEX:
-                nz *= 2;
-                break;
-        }
-
-        double[] Xx = new double[nz];
-        x.get().get(0, Xx, 0, nz);
-
-        return new MatrixValues<>(Xx, Xz);
+        return nrow.intValue();
     }
 
     @Override
-    public void setValues(double[] Xx, double[] Xz)
+    public int getNCol()
     {
-        int nv = Xx.length;
-        switch (xtype.get())
-        {
-            case CHOLMOD_PATTERN:
-                throw new RuntimeException("CHOLMOD_PATTERN unsupported");
-            case CHOLMOD_ZOMPLEX:
-                z.get().put(0, Xz, 0, nv);
-                break;
-        }
+        return ncol.intValue();
+    }
 
-        x.get().put(0, Xx, 0, nv);
+    @Override
+    public jnr.ffi.Pointer getX()
+    {
+        return x.get();
+    }
+
+    @Override
+    public jnr.ffi.Pointer getZ()
+    {
+        return z.get();
+    }
+
+    @Override
+    public XType getXType()
+    {
+        return xtype.get();
+    }
+
+    @Override
+    public int getNZMax()
+    {
+        return nzmax.intValue();
+    }
+
+    @Override
+    public DType getDType()
+    {
+        return dtype.get();
+    }
+
+    public int getD()
+    {
+        return d.intValue();
     }
 }

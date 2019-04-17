@@ -96,14 +96,14 @@ class CholmodDemoTest
 
         for (TestComponent component : TEST_COMPONENTS)
         {
-            Map<String, Object> expected = loadResourceValues("/"+component.getResults());
+            Map<String, Object> expected = loadResourceValues("/" + component.getResults());
             Map<String, Object> actual = testRunDemo("/" + component.getMatrix());
             compare(expected, actual);
         }
-        if(skipped.size() > 0)
+        if (skipped.size() > 0)
         {
             System.out.println("Skipped lines:");
-            for(String s : skipped)
+            for (String s : skipped)
             {
                 System.out.format("\t%s\n", s);
             }

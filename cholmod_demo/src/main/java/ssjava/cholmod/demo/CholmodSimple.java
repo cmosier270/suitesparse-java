@@ -44,26 +44,24 @@ public class CholmodSimple
         cholmod_common c = new cholmod_common();
         core.cholmod_start(c);
         A = check.cholmod_read_sparse(JnrLibcExtra.StdioStream(lce.stdin()), c);
-        double[] ax = new double[3];
-        A.x.get().get(0,ax,0,3);
-        System.out.format("A: %s, %s\n", A.stype.get().toString(), Arrays.toString(ax));
+        double[] ax = A.getDoubleValues().getX();
+        System.out.format("A: %s, %s\n", A.getSType().toString(), Arrays.toString(ax));
         check.cholmod_print_sparse(A, "A",c);
 
-        if(A == null || A.stype.get() == cholmod_sparse.SType.UNSYMMETRIC)
+        if(A == null || A.getSType() == cholmod_sparse.SType.UNSYMMETRIC)
         {
             Core.Cholmod_Free_Sparse(core, A, c);
             core.cholmod_finish(c);
             return 0;
         }
 
-        b = core.cholmod_ones(A.nrow.intValue(), 1, A.xtype.get(), c);
+        b = core.cholmod_ones(A.getNRow(), 1, A.getXType(), c);
         L = chol.cholmod_analyze(A, c);
         int res = chol.cholmod_factorize(A, L, c);
 
         x = chol.cholmod_solve(SolveSystem.CHOLMOD_A, L, b, c);
-        int ncol = A.ncol.intValue();
-        double[] xx = new double[ncol];
-        x.x.get().get(0, xx, 0, ncol);
+        int ncol = A.getNCol();
+        double[] xx = x.getDoubleValues().getX();
         System.out.println(Arrays.toString(xx));
         r = core.cholmod_copy_dense(b, c);
         mops.cholmod_sdmult(A, 0, m1, one, x, r, c);

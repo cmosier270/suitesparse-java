@@ -14,7 +14,7 @@ public enum SolveSystem
 
     private int code;
     SolveSystem(int code) {this.code = code;}
-    public int getCode() {return code;}
+    public int intValue() {return code;}
 
 
 }

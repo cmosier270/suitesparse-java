@@ -39,6 +39,11 @@ public interface Core
             return subsub;
         }
 
+        public int getFullVersion()
+        {
+            return rv;
+        }
+
         private final int rv;
         private final int main;
         private final int sub;
@@ -184,6 +189,41 @@ public interface Core
                                 @In XType xtype,
                                 cholmod_common cc);
 
+    enum CholmodCopyMode
+    {
+        PATTERN(0),
+        PATTERN_NO_DIAG(-1),
+        NUMERICAL(1);
+
+        private CholmodCopyMode(int code)
+        {
+            this.code = code;
+        }
+        private final int code;
+        public int intValue() {return code;}
+    }
+    /** cholmod_copy has bug in underlying library, can not copy complex values */
+    cholmod_sparse cholmod_copy
+            (
+                    /* ---- input ---- */
+                    @In cholmod_sparse A,           /* matrix to copy */
+                    @In cholmod_sparse.SType stype,        /* requested stype of C */
+                    @In CholmodCopyMode mode,        /* >0: numerical, 0: pattern, <0: pattern (no diag) */
+                    /* --------------- */
+                    cholmod_common cc
+            );
+
+    /** cholmod_l_copy has bug in underlying library, can not copy complex values */
+    cholmod_sparse cholmod_l_copy
+    (
+            /* ---- input ---- */
+            @In cholmod_sparse A,           /* matrix to copy */
+            @In cholmod_sparse.SType stype,        /* requested stype of C */
+            @In CholmodCopyMode mode,        /* >0: numerical, 0: pattern, <0: pattern (no diag) */
+            /* --------------- */
+            cholmod_common cc
+    );
+
     cholmod_dense cholmod_copy_dense(@In cholmod_dense X, cholmod_common cc);
     cholmod_dense cholmod_l_copy_dense(@In cholmod_dense X, cholmod_common cc);
 
@@ -211,6 +251,9 @@ public interface Core
 
     cholmod_sparse cholmod_triplet_to_sparse(@In cholmod_triplet T, @In @size_t long nzmax, cholmod_common cc);
     cholmod_sparse cholmod_l_triplet_to_sparse(@In cholmod_triplet T, @In @size_t long nzmax, cholmod_common cc);
+
+    cholmod_dense cholmod_sparse_to_dense(@In cholmod_sparse A, cholmod_common cc);
+    cholmod_dense cholmod_l_sparse_to_dense(@In cholmod_sparse A, cholmod_common cc);
 
     int cholmod_free_dense(PointerByReference X, cholmod_common cc);
 

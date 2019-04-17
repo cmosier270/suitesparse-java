@@ -117,7 +117,8 @@ public class CholmodDemo
         int s;
         int ss;
         int lnz ;
-        int trial, method, L_is_super ;
+        int trial, method;
+        boolean L_is_super ;
         int[] ver = new int[3] ;
 
         ts[0] = 0.;
@@ -158,7 +159,7 @@ public class CholmodDemo
          * definite, ...).  It makes the demo program simpler (no need to check
          * CHOLMOD error conditions).  This non-default parameter setting has no
          * effect on performance. */
-        cm.error_handler.set(my_handler);
+        cm.setError_handler(my_handler);
 
         /* Note that CHOLMOD will do a supernodal LL' or a simplicial LDL' by
          * default, automatically selecting the latter if flop/nnz(L) < 40. */
@@ -191,7 +192,7 @@ public class CholmodDemo
             jle.fclose (ff) ;
             ff = null;
         }
-        xtype = A.xtype.get();
+        xtype = A.getXType();
         anorm = 1 ;
         anorm = mops.cholmod_norm_sparse (A, 0, cm) ;
         pw.format("norm (A,inf) = %-10.0f\n", anorm) ;
@@ -200,7 +201,7 @@ public class CholmodDemo
         check.cholmod_print_sparse (A, "A", cm) ;
         jle.fflush(JnrLibcExtra.StdioStream(jle.stdout()));
 
-        if (A.nrow.intValue() > A.ncol.intValue())
+        if (A.getNRow() > A.getNCol())
         {
             /* Transpose A so that A'A+beta*I will be factorized instead */
             cholmod_sparse C = core.cholmod_transpose (A, 2, cm) ;
@@ -213,7 +214,7 @@ public class CholmodDemo
         /* create an arbitrary right-hand-side */
         /* ---------------------------------------------------------------------- */
 
-        n = A.nrow.intValue() ;
+        n = A.getNRow();
         B = core.cholmod_zeros (n, 1, xtype, cm) ;
         Bx = B.getDoubleValues().getX();
 
@@ -263,9 +264,9 @@ public class CholmodDemo
         ta = sscfg.SuiteSparse_time() - t ;
         ta = Math.max (ta, 0) ;
 
-        pw.format("Analyze: flop %g lnz %g\n", cm.fl.doubleValue(), cm.lnz.doubleValue()) ;
+        pw.format("Analyze: flop %g lnz %g\n", cm.getFl(), cm.getLnz()) ;
 
-        if (A.stype.get() == cholmod_sparse.SType.UNSYMMETRIC)
+        if (A.getSType() == cholmod_sparse.SType.UNSYMMETRIC)
         {
             pw.println("Factorizing A*A'+beta*I") ;
             t = sscfg.SuiteSparse_time();
@@ -287,11 +288,11 @@ public class CholmodDemo
         jle.fflush(JnrLibcExtra.StdioStream(jle.stdout()));
 
         /* determine the # of integers's and reals's in L.  See cholmod_free */
-        if (L.is_super.intValue() != 0)
+        if (L.isSuper())
         {
-            s = L.nsuper.intValue() + 1 ;
-            xsize = L.xsize.intValue() ;
-            ss = L.ssize.intValue() ;
+            s = L.getNSuper() + 1 ;
+            xsize = L.getXSize();
+            ss = L.getSSize();
             isize =
                     n	/* L->Perm */
                     + n	/* L->ColCount, nz in each column of 'pure' L */
@@ -304,7 +305,7 @@ public class CholmodDemo
         {
             /* this space can increase if you change parameters to their non-
              * default values (cm->final_pack, for example). */
-            lnz = L.nzmax.intValue() ;
+            lnz = L.getNZMax();
             xsize = lnz ;
             isize =
                     n	/* L->Perm */
@@ -318,7 +319,7 @@ public class CholmodDemo
 
         /* solve with Bset will change L from simplicial to supernodal */
         rcond = cholesky.cholmod_rcond (L, cm) ;
-        L_is_super = L.is_super.intValue() ;
+        L_is_super = L.isSuper() ;
 
         /* ---------------------------------------------------------------------- */
         /* solve */
@@ -345,7 +346,7 @@ public class CholmodDemo
                 {
                     Core.Cholmod_Free_Dense(core,X,cm); X = null;
                     Bx [0] = 1 + trial / x ;        /* tweak B each iteration */
-                    B.x.get().putDouble(0, Bx[0]);
+                    B.getX().putDouble(0, Bx[0]);
                     X = cholesky.cholmod_solve (CHOLMOD_A, L, B, cm) ;
                 }
                 ts [1] = sscfg.SuiteSparse_time() - t ;
@@ -396,8 +397,8 @@ public class CholmodDemo
 
                 cholmod_sparse Bset = core.cholmod_allocate_sparse(n, 1, 1, 0, 1,
                         cholmod_sparse.SType.UNSYMMETRIC, CHOLMOD_PATTERN, cm);
-                Bset.p.get().put(0,new int[] {0,1},0,2);
-                Pointer Bseti = Bset.i.get() ;
+                Bset.setColumnPointers(new int[] {0,1});
+                Pointer Bseti = Bset.getI();
                 resid [3] = 0 ;
 
                 for (i = 0 ; i < Math.min (100,n) ; i++)
@@ -448,13 +449,11 @@ public class CholmodDemo
                     Xset.useMemory(ptrXset.getValue());
                     X2.useMemory(ptrX2.getValue());
                     /* check the solution and log the time */
-                    Xseti = new int[Xset.nzmax.intValue()];
-                    Xset.i.get().get(0, Xseti, 0, Xseti.length);
-                    xlen = Xset.p.get().getInt(Integer.BYTES /* offset 1 */);
+                    Xseti = Xset.getRowIndicesAsInt();
+                    xlen = Xset.getP().getInt(Integer.BYTES /* offset 1 */);
                     X1x = X.getDoubleValues().getX();
                     X2x = X2.getDoubleValues().getX();
-                    Lnz = new int[A.ncol.intValue()];
-                    L.nz.get().get(0, Lnz, 0, Lnz.length);
+                    Lnz = L.getColumnNonZeros();
 
                 /*
                 printf ("\ni %d xlen %d  (%p %p)\n", i, xlen, X1x, X2x) ;
@@ -506,10 +505,9 @@ public class CholmodDemo
                 if (timelog != null)
                 {
                     timelog.format("] ; resid = %g ;\n", resid [3]) ;
-                    timelog.format("lnz = %g ;\n", cm.lnz.doubleValue()) ;
+                    timelog.format("lnz = %g ;\n", cm.getLnz()) ;
                     timelog.format("t = %g ;   %% dense solve time\n", ts [2]) ;
                     timelog.close();
-                    timelog = null;
                 }
 
 // #ifndef NMATRIXOPS
@@ -532,11 +530,11 @@ public class CholmodDemo
             {
 // #ifndef NMATRIXOPS
 
-                if (A.stype.get() == cholmod_sparse.SType.UNSYMMETRIC)
+                if (A.getSType() == cholmod_sparse.SType.UNSYMMETRIC)
                 {
                     /* (AA'+beta*I)x=b is the linear system that was solved */
                     /* W = A'*X */
-                    W = core.cholmod_allocate_dense (A.ncol.intValue(), 1, A.ncol.intValue(), xtype, cm) ;
+                    W = core.cholmod_allocate_dense (A.getNCol(), 1, A.getNCol(), xtype, cm) ;
                     mops.cholmod_sdmult (A, 2, one, zero, X, W, cm) ;
                     /* R = B - beta*X */
                     Core.Cholmod_Free_Dense(core,R,cm);
@@ -592,7 +590,7 @@ public class CholmodDemo
 
         resid2 = -1 ;
 //#ifndef NMATRIXOPS
-        if (A.stype.get() != cholmod_sparse.SType.UNSYMMETRIC && A.xtype.get() == CHOLMOD_REAL)
+        if (A.getSType() != cholmod_sparse.SType.UNSYMMETRIC && A.getXType() == CHOLMOD_REAL)
         {
             /* R2 = A\(B-A*X) */
             cholmod_dense R2 = cholesky.cholmod_solve (CHOLMOD_A, L, R, cm) ;
@@ -621,14 +619,15 @@ public class CholmodDemo
         /* print results */
         /* ---------------------------------------------------------------------- */
 
-        anz = cm.anz.doubleValue() ;
+        anz = cm.getAnz();
         for (i = 0 ; i < CHOLMOD_MAXMETHODS ; i++)
         {
-            fl = cm.method[i].fl.doubleValue() ;
-            xlnz = cm.method[i].lnz.doubleValue() ;
-            cm.method [i].fl.set(-1) ;
-            cm.method [i].lnz.set(-1);
-            ordering = cm.method[i].ordering.get() ;
+            CholmodMethod cholmodMethod = cm.getMethod(i);
+            fl = cholmodMethod.getFl();
+            xlnz = cholmodMethod.getLnz();
+            cholmodMethod.setFl(-1);
+            cholmodMethod.setLnz(-1);
+            ordering = cholmodMethod.getOrdering();
             if (fl >= 0)
             {
                 pw.print("Ordering: ") ;
@@ -653,36 +652,36 @@ public class CholmodDemo
         pw.format("ints in L: %15.0f, doubles in L: %15.0f\n",
                 (double) isize, (double) xsize) ;
         pw.format("factor flops %g nnz(L) %15.0f (w/no amalgamation)\n",
-                cm.fl.doubleValue(), cm.lnz.doubleValue()) ;
-        if (A.stype.get() == cholmod_sparse.SType.UNSYMMETRIC)
+                cm.getFl(), cm.getLnz()) ;
+        if (A.getSType() == cholmod_sparse.SType.UNSYMMETRIC)
         {
-            pw.format("nnz(A):    %15.0f\n", cm.anz.doubleValue()) ;
+            pw.format("nnz(A):    %15.0f\n", cm.getAnz()) ;
         }
         else
         {
-            pw.format("nnz(A*A'): %15.0f\n", cm.anz.doubleValue()) ;
+            pw.format("nnz(A*A'): %15.0f\n", cm.getAnz()) ;
         }
-        if (cm.lnz.doubleValue() > 0)
+        if (cm.getLnz() > 0)
         {
-            pw.format("flops / nnz(L):  %8.1f\n", cm.fl.doubleValue() / cm.lnz.doubleValue()) ;
+            pw.format("flops / nnz(L):  %8.1f\n", cm.getFl() / cm.getLnz()) ;
         }
         if (anz > 0)
         {
-            pw.format("nnz(L) / nnz(A): %8.1f\n", cm.lnz.doubleValue() / cm.anz.doubleValue()) ;
+            pw.format("nnz(L) / nnz(A): %8.1f\n", cm.getLnz() / cm.getAnz()) ;
         }
         pw.format("analyze cputime:  %12.4f\n", ta) ;
         pw.format("factor  cputime:   %12.4f mflop: %8.1f\n", tf,
-                (tf == 0) ? 0 : (1e-6*cm.fl.doubleValue() / tf)) ;
+                (tf == 0) ? 0 : (1e-6*cm.getFl() / tf)) ;
         pw.format("solve   cputime:   %12.4f mflop: %8.1f\n", ts [0],
-                (ts [0] == 0) ? 0 : (1e-6*4*cm.lnz.doubleValue() / ts [0])) ;
+                (ts [0] == 0) ? 0 : (1e-6*4*cm.getLnz() / ts [0])) ;
         pw.format("overall cputime:   %12.4f mflop: %8.1f\n",
-                tot, (tot == 0) ? 0 : (1e-6 * (cm.fl.doubleValue() + 4 * cm.lnz.doubleValue()) / tot)) ;
+                tot, (tot == 0) ? 0 : (1e-6 * (cm.getFl() + 4 * cm.getLnz()) / tot)) ;
         pw.format("solve   cputime:   %12.4f mflop: %8.1f (%d trials)\n", ts [1],
-                (ts [1] == 0) ? 0 : (1e-6*4*cm.lnz.doubleValue() / ts [1]), NTRIALS) ;
+                (ts [1] == 0) ? 0 : (1e-6*4*cm.getLnz() / ts [1]), NTRIALS) ;
         pw.format("solve2  cputime:   %12.4f mflop: %8.1f (%d trials)\n", ts [2],
-                (ts [2] == 0) ? 0 : (1e-6*4*cm.lnz.doubleValue() / ts [2]), NTRIALS) ;
+                (ts [2] == 0) ? 0 : (1e-6*4*cm.getLnz() / ts [2]), NTRIALS) ;
         pw.format("peak memory usage: %12.0f (MB)\n",
-                (double) (cm.memory_usage.longValue()) / 1048576.) ;
+                (double) (cm.getMemory_usage()) / 1048576.) ;
         pw.print("residual (|Ax-b|/(|A||x|+|b|)): ") ;
         for (method = 0 ; method <= 3 ; method++)
         {
@@ -697,7 +696,7 @@ public class CholmodDemo
 
         pw.format("rcond    %8.1e\n\n", rcond) ;
 
-        if (L_is_super != 0)
+        if (L_is_super)
         {
             check.cholmod_gpu_stats (cm) ;
         }

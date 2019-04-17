@@ -58,4 +58,24 @@ class JnrLibcExtraTest
         tmp.delete();
     }
 
+    @Test void memcpy_test()
+    {
+        int n = 25;
+        Runtime r = Runtime.getSystemRuntime();
+        Pointer p = Memory.allocateDirect(r, n*Integer.BYTES);
+        int[] vals = new int[n];
+        for(int i=0; i < n; ++i)
+        {
+            vals[i] = i+1;
+        }
+        p.put(0, vals, 0, n);
+
+        Pointer p2 = Memory.allocateDirect(r, n * Integer.BYTES);
+        libc.memcpy(p2, p, n * Integer.BYTES);
+        int[] vals2 = new int[n];;
+        p2.get(0, vals2, 0, n);
+        assertArrayEquals(vals, vals2);
+
+    }
+
 }

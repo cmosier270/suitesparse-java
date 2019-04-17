@@ -55,4 +55,6 @@ public interface JnrLibcExtra
     {
         return Pointer.wrap(Runtime.getSystemRuntime(), jnrstream.get());
     }
+
+    Pointer memcpy(@In Pointer dest, @In Pointer src, @In @size_t long n);
 }
