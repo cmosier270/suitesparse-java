@@ -18,7 +18,7 @@ class JnrLibcExtraTest
     void stdout_global_var()
     {
         Pointer stdout = JnrLibcExtra.StdioStream(libc.stdout());
-        assertTrue(libc.fputs("Hello, World", stdout) > 0);
+        assertTrue(libc.fputs("Writing through LIBC", stdout) > 0);
     }
 
     @Test

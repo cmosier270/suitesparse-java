@@ -89,6 +89,10 @@ public class SuiteSparse_configTest
         SuiteSparseVersion v = SuiteSparse_config.HelpVersion(ssc);
         /** Just test grabbing the value, not much else to do */
         System.out.format("Version: %s\n", v.toString());
+        assertTrue(v.getSuitesparseMainVersion() >= 5);
+        assertTrue(v.getSuitesparseSubVersion() >= 0);
+        assertTrue(v.getSuitesparseSubsubVersion() >= 0);
+        assertTrue(v.getSuitesparseVersion() > 5000);
     }
 
 }

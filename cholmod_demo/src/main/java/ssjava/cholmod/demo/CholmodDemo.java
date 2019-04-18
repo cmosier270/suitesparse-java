@@ -73,7 +73,7 @@ public class CholmodDemo
     private Pointer ff = null;
 
     /* halt if an error occurs */
-    private ErrorHandler my_handler = (status, file, line, message) ->
+    ErrorHandler my_handler = (status, file, line, message) ->
     {
         System.err.format("cholmod error: file: %s line: %d status: %s: %s\n",
                 file, line, status, message) ;

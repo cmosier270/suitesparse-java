@@ -1,6 +1,7 @@
 package ssjava.cholmod.demo;
 
 import org.junit.jupiter.api.Test;
+import ssjava.cholmod.CholmodStatus;
 
 
 import java.io.*;
@@ -128,7 +129,6 @@ class CholmodDemoTest
                     break;
                 }
                 default:
-//                    System.err.format("%s: %s <-> %s\n", key, expval, actval);
                     assertEquals(expval, actval);
             }
         }
@@ -266,4 +266,43 @@ class CholmodDemoTest
         return rv;
     }
 
+    @Test void exerciseMainWithFile()
+    {
+        boolean caught = false;
+        try
+        {
+            CholmodDemo.main(getClass().getResource("/up.tri").getFile());
+        }
+        catch(Exception e)
+        {
+            caught = true;
+        }
+        assertFalse(caught);
+    }
+
+    @Test void exerciseMainWithoutFile()
+    {
+        /**
+         * The test should have stdin redirected to a file on the command line.
+         * Otherwise, we can not really pass in a stdin from java that
+         * works with the c-library stdin used by SuiteSparse
+         */
+
+        boolean caught = false;
+        try
+        {
+            CholmodDemo.main(new String[0]);
+        }
+        catch(Exception e)
+        {
+            caught = true;
+        }
+        assertFalse(caught);
+    }
+
+    @Test void exerciseErrorHandler()
+    {
+        CholmodDemo cm = new CholmodDemo();
+        cm.my_handler.report(CholmodStatus.CHOLMOD_OK,"nofile",-2,"Test message to error handler");
+    }
 }
