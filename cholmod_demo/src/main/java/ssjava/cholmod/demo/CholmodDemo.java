@@ -142,7 +142,14 @@ public class CholmodDemo
         }
         else
         {
-            f = JnrLibcExtra.StdioStream(jle.stdin());
+            /** In this section, the original cholmod_demo expects to just read
+             * stdin as a matrix.  To avoid competition with stdin (LIBC access outside of Java),
+             * read the input and store it as a temporary file.
+             */
+            File java_stdin = File.createTempFile("cholmod-demo-stdin", null);
+            copyStdin(java_stdin);
+            ff = jle.fopen(java_stdin.getAbsolutePath(), "r");
+            java_stdin.delete();
         }
 
         /* ---------------------------------------------------------------------- */
@@ -186,7 +193,7 @@ public class CholmodDemo
         pw.format ("cholmod version %d.%d.%d\n", ver [0], ver [1], ver [2]) ;
         sscfg.SuiteSparse_version (ver) ;
         pw.format("SuiteSparse version %d.%d.%d\n", ver [0], ver [1], ver [2]) ;
-        A = check.cholmod_read_sparse (f, cm) ;
+        A = check.cholmod_read_sparse (ff, cm) ;
         if (ff != null)
         {
             jle.fclose (ff) ;
@@ -713,6 +720,19 @@ public class CholmodDemo
         core.cholmod_finish (cm) ;
         pw.flush();
 
+    }
+
+    private void copyStdin(File java_stdin) throws IOException
+    {
+        OutputStream out = new BufferedOutputStream(new FileOutputStream(java_stdin));
+        InputStream in = new BufferedInputStream(System.in);
+        int ch = in.read();
+        while(ch != -1)
+        {
+            out.write(ch);
+            ch = in.read();
+        }
+        out.close();
     }
 
 }

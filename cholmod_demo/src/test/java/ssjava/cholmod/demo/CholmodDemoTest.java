@@ -68,6 +68,7 @@ class CholmodDemoTest
         FIELDS.add("nnz(L) / nnz(A)");
         FIELDS.add("residual");
         FIELDS.add("rcond");
+        FIELDS.add("transposing input");
         FIELDS.add("peak memory usage");
     }
     private static final Pattern SPACES = Pattern.compile("\\s+");
@@ -108,6 +109,7 @@ class CholmodDemoTest
             {
                 System.out.format("\t%s\n", s);
             }
+            assertFalse(true);
         }
     }
 
@@ -282,13 +284,9 @@ class CholmodDemoTest
 
     @Test void exerciseMainWithoutFile()
     {
-        /**
-         * The test should have stdin redirected to a file on the command line.
-         * Otherwise, we can not really pass in a stdin from java that
-         * works with the c-library stdin used by SuiteSparse
-         */
-
         boolean caught = false;
+        InputStream stdin = System.in;
+        System.setIn(getClass().getResourceAsStream("/up.tri"));
         try
         {
             CholmodDemo.main(new String[0]);
@@ -296,6 +294,10 @@ class CholmodDemoTest
         catch(Exception e)
         {
             caught = true;
+        }
+        finally
+        {
+            System.setIn(stdin);
         }
         assertFalse(caught);
     }
